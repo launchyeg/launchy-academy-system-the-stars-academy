@@ -39,6 +39,7 @@ export default function StudentTable({
         <table className="w-full min-w-[640px] text-right">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/60 text-sm text-slate-500">
+              <th className="px-5 py-3 font-medium">#</th>
               <th className="px-5 py-3 font-medium">اسم الطالب</th>
               <th className="px-5 py-3 font-medium">رقم هاتف الطالب</th>
               <th className="px-5 py-3 font-medium">رقم هاتف ولي الأمر</th>
@@ -48,11 +49,12 @@ export default function StudentTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {students.map((student) => (
+            {students.map((student, index) => (
               <tr
                 key={student.id}
                 className="text-sm text-slate-700 transition-colors hover:bg-slate-50/60"
               >
+                <td className="px-5 py-3.5 text-slate-500">{index + 1}</td>
                 <td className="px-5 py-3.5 font-medium">{student.name}</td>
                 <td className="px-5 py-3.5 text-slate-500" dir="ltr">
                   {student.phone}
