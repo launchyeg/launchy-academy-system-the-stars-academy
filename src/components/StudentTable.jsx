@@ -1,5 +1,16 @@
 import { CalendarPlus, Pencil, Trash2, UserRound } from "lucide-react";
 
+/** Most recent subscription by start date (falls back to array order when
+ * dates are missing/equal), used to reflect that month's payment status on
+ * the "سجل التفاصيل" button. */
+function getLatestSubscription(student) {
+  const subscriptions = student.subscriptions || [];
+  if (subscriptions.length === 0) return null;
+  return [...subscriptions].sort((a, b) =>
+    (b.startDate || "").localeCompare(a.startDate || ""),
+  )[0];
+}
+
 /**
  * Responsive table listing the students of a group, with edit/delete actions
  * and an "الحضور" action that opens the attendance/subscription card.
@@ -51,19 +62,35 @@ export default function StudentTable({
                 </td>
                 <td className="px-5 py-3.5">{student.price} ج.م</td>
                 <td className="px-5 py-3.5">
-                  <button
-                    type="button"
-                    onClick={() => onAttendance(student)}
-                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50"
-                  >
-                    <CalendarPlus size={14} />
-                    سجل التفاصيل
-                    {student.subscriptions?.length > 0 && (
-                      <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                        {student.subscriptions.length}
-                      </span>
-                    )}
-                  </button>
+                  {(() => {
+                    const latestSubscription = getLatestSubscription(student);
+                    const unpaid = latestSubscription && !latestSubscription.paid;
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => onAttendance(student)}
+                        className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${
+                          unpaid
+                            ? "text-amber-600 hover:bg-amber-50"
+                            : "text-emerald-600 hover:bg-emerald-50"
+                        }`}
+                      >
+                        <CalendarPlus size={14} />
+                        سجل التفاصيل
+                        {student.subscriptions?.length > 0 && (
+                          <span
+                            className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                              unpaid
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {student.subscriptions.length}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })()}
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-2">

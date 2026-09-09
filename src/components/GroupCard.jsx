@@ -15,10 +15,17 @@ export default function GroupCard({ group, onEdit, onDelete }) {
       whileHover={{ y: -3 }}
       className="group relative flex flex-col items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 text-right shadow-sm transition-shadow hover:shadow-md"
     >
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => navigate(`/dashboard/groups/${group.id}`)}
-        className="flex w-full flex-col items-start gap-4 text-right"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            navigate(`/dashboard/groups/${group.id}`);
+          }
+        }}
+        className="flex w-full cursor-pointer flex-col items-start gap-4 text-right"
       >
         <div className="flex w-full items-start justify-between">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
@@ -64,7 +71,7 @@ export default function GroupCard({ group, onEdit, onDelete }) {
             </span>
           </p>
         </div>
-      </button>
+      </div>
     </motion.div>
   );
 }

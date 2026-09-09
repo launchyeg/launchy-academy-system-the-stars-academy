@@ -12,6 +12,7 @@ import {
   Save,
   Plus,
   ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import Modal from "./Modal";
 import ConfirmDialog from "./ConfirmDialog";
@@ -114,6 +115,38 @@ function PaymentMethodField({ value, onChange }) {
         })}
       </div>
     </div>
+  );
+}
+
+/** Pill-shaped paid/unpaid switch shown under a subscription's payment
+ * method, turned on automatically when the subscription is created. Forced
+ * `dir="ltr"` so the knob always slides the same physical way regardless of
+ * the page's RTL direction. */
+function PaidToggle({ paid, onChange }) {
+  return (
+    <label className="inline-flex cursor-pointer select-none items-center gap-2">
+      <span
+        className={`text-xs font-semibold ${paid ? "text-green-600" : "text-slate-400"}`}
+      >
+        {paid ? "تم الدفع" : "لم يتم الدفع"}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={paid}
+        dir="ltr"
+        onClick={() => onChange(!paid)}
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200 ${
+          paid ? "bg-green-500" : "bg-slate-300"
+        }`}
+      >
+        <span
+          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+            paid ? "translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
+    </label>
   );
 }
 
@@ -311,7 +344,11 @@ export default function AttendanceModal({
     }
 
     try {
-      const newSubscriptionId = await onAdd({ startDate, endDate, paymentMethod });
+      const newSubscriptionId = await onAdd({
+        startDate,
+        endDate,
+        paymentMethod,
+      });
       setStartDate("");
       setPaymentMethod(PAYMENT_METHODS[0].value);
       setError("");
@@ -347,6 +384,12 @@ export default function AttendanceModal({
       parentPhone: student.parentPhone,
     });
     window.open(link, "_blank", "noopener,noreferrer");
+  }
+
+  function handleTogglePaid(sub) {
+    // Committed immediately (unlike attendance/grades, which are staged in a
+    // draft and saved explicitly) since it's a single, self-contained flag.
+    onUpdateSubscriptionRecords(sub.id, { paid: !sub.paid });
   }
 
   function toggleExpandSubscription(sub) {
@@ -507,14 +550,8 @@ export default function AttendanceModal({
                             </span>
                             {sub.endDate}
                           </span>
-                          <span>
-                            <span className="text-slate-400">
-                              طريقة الدفع:{" "}
-                            </span>
-                            {sub.paymentMethod}
-                          </span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                        <div className="flex flex-wrap items-center justify-end gap-2 self-start sm:self-auto">
                           <button
                             type="button"
                             onClick={() => toggleExpandSubscription(sub)}
@@ -546,6 +583,24 @@ export default function AttendanceModal({
                           </button>
                         </div>
                       </div>
+
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2">
+                        <span className="text-slate-600">
+                          <span className="text-slate-400">طريقة الدفع: </span>
+                          {sub.paymentMethod}
+                        </span>
+                        <PaidToggle
+                          paid={sub.paid}
+                          onChange={() => handleTogglePaid(sub)}
+                        />
+                      </div>
+
+                      {!sub.paid && (
+                        <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+                          <AlertTriangle size={14} />
+                          لم يتم الدفع بعد
+                        </div>
+                      )}
 
                       {expanded && (
                         <div className="mt-3 border-t border-slate-100 pt-3">

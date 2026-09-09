@@ -11,7 +11,7 @@ const GROUPS_SELECT = `
   students (
     id, name, phone, parent_phone, price,
     subscriptions (
-      id, start_date, end_date, payment_method, attendance, quizzes, final_exam, note
+      id, start_date, end_date, payment_method, paid, attendance, quizzes, final_exam, note
     )
   )
 `
@@ -25,6 +25,8 @@ function mapSubscription(row) {
     startDate: row.start_date,
     endDate: row.end_date,
     paymentMethod: row.payment_method,
+    // Defaults to true for older rows fetched before this column existed.
+    paid: row.paid ?? true,
     attendance: row.attendance,
     quizzes: row.quizzes,
     finalExam: row.final_exam,
@@ -186,6 +188,10 @@ export function AcademyProvider({ children }) {
       start_date: subscription.startDate,
       end_date: subscription.endDate,
       payment_method: subscription.paymentMethod,
+      // A subscription is recorded as paid by default the moment it's
+      // created; the admin can flip it off from the paid toggle afterwards
+      // if the payment turns out not to have gone through.
+      paid: true,
     })
     if (insertError) throw insertError
 
@@ -202,13 +208,16 @@ export function AcademyProvider({ children }) {
     await refresh()
   }
 
-  // Commits attendance/quizzes/finalExam/note for one subscription (one month).
+  // Commits attendance/quizzes/finalExam/note/paid for one subscription (one
+  // month). The paid toggle is committed through here too, immediately on
+  // click, rather than through the attendance/grades draft-then-save flow.
   async function updateSubscriptionRecords(groupId, studentId, subscriptionId, records) {
     const payload = {}
     if ('attendance' in records) payload.attendance = records.attendance
     if ('quizzes' in records) payload.quizzes = records.quizzes
     if ('finalExam' in records) payload.final_exam = records.finalExam
     if ('note' in records) payload.note = records.note
+    if ('paid' in records) payload.paid = records.paid
 
     const { error: updateError } = await supabase
       .from('subscriptions')

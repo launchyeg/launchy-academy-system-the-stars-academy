@@ -40,11 +40,12 @@ Three tables in Postgres, all with Row Level Security enabled (only authenticate
 ```
 groups (id, name)
   └─ students (id, group_id, name, phone, parent_phone, price)
-       └─ subscriptions (id, student_id, start_date, end_date, payment_method,
+       └─ subscriptions (id, student_id, start_date, end_date, payment_method, paid,
                           attendance[], quizzes[], final_exam, note)
 ```
 
 - One subscription = one month's record set — `attendance`/`quizzes` are fixed-length array columns (see `RECORD_SLOTS` in `src/constants.js`) holding that month's per-session attendance and quiz grades.
+- `paid` is a boolean, defaulting to `true` the moment a subscription is created; the admin can flip it off from the paid toggle in the subscriptions log if the payment doesn't actually go through, which surfaces a "لم يتم الدفع بعد" (no payment yet) warning under that subscription.
 - `src/lib/supabaseClient.js` creates the shared Supabase client from the env vars above.
 - `src/context/AcademyContext.jsx` is the only place that talks to the `groups`/`students`/`subscriptions` tables — it fetches the full group/student/subscription tree on load, maps the DB's snake_case columns to the camelCase shape the UI expects, and re-syncs after every mutation. No other component queries Supabase directly.
 - `src/context/AuthContext.jsx` wraps Supabase Auth (`signInWithPassword` / `onAuthStateChange` / `signOut`) for the admin session.
