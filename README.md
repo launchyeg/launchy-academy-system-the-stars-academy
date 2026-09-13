@@ -14,7 +14,7 @@ The app needs a Supabase project (tables + Auth). Create a `.env` file with:
 
 ```bash
 VITE_SUPABASE_URL=your-project-url
-VITE_SUPABASE_PUBLISHABLE_KEY=your-anon/publishable-key
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-public-key
 ```
 
 Both values come from your Supabase project's **Settings → API** page. The publishable/anon key is safe to expose client-side — access is actually controlled by the Row Level Security policies on each table (see [Backend](#4-backend--database) below), not by keeping this key secret.
