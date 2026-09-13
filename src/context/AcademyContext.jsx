@@ -49,7 +49,12 @@ function mapGroup(row) {
   return {
     id: row.id,
     name: row.name,
-    students: (row.students || []).map(mapStudent),
+    // Sorted alphabetically (Arabic-aware) so every table/list that reads
+    // group.students — group pages, Data Center, etc. — shows students in
+    // the same order without each consumer having to sort it separately.
+    students: (row.students || [])
+      .map(mapStudent)
+      .sort((a, b) => a.name.localeCompare(b.name, 'ar')),
   }
 }
 
