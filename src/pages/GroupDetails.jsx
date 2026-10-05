@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { UserPlus, Users2, ChevronRight, Search, Wallet } from "lucide-react";
+import { UserPlus, Users2, ChevronRight, Search, Wallet, Banknote } from "lucide-react";
+import { getTotalCollected } from "../utils/collected";
 import { useAcademy } from "../context/AcademyContext";
 import StudentTable from "../components/StudentTable";
 import StatCard from "../components/StatCard";
@@ -75,12 +76,20 @@ export default function GroupDetails() {
         العودة إلى المجموعات
       </Link>
 
-      <StatCard
-        icon={Wallet}
-        label="إجمالي الاشتراكات الشهرية"
-        value={`${totalMonthlySubscriptions} ج.م`}
-        accent="amber"
-      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <StatCard
+          icon={Wallet}
+          label="إجمالي الاشتراكات الشهرية"
+          value={`${totalMonthlySubscriptions} ج.م`}
+          accent="amber"
+        />
+        <StatCard
+          icon={Banknote}
+          label="إجمالي المحصّل"
+          value={`${getTotalCollected(group.students)} ج.م`}
+          accent="emerald"
+        />
+      </div>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from './AuthContext'
+import { getTotalCollected } from '../utils/collected'
 
 const AcademyContext = createContext(null)
 
@@ -239,7 +240,8 @@ export function AcademyProvider({ children }) {
       (sum, g) => sum + g.students.reduce((s, student) => s + Number(student.price || 0), 0),
       0
     )
-    return { totalGroups, totalStudents, totalRevenue }
+    const totalCollected = getTotalCollected(groups.flatMap((g) => g.students))
+    return { totalGroups, totalStudents, totalRevenue, totalCollected }
   }, [groups])
 
   const value = {
